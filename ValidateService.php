@@ -2,6 +2,8 @@
 require(__DIR__ . '/Valiadate/ReqiredValidate.php');
 require(__DIR__ . '/Valiadate/EmailValidate.php');
 require(__DIR__ . '/Valiadate/MinValidate.php');
+require(__DIR__ . '/Valiadate/BetWeenValidate.php');
+require(__DIR__ . '/Valiadate/RequiredWith.php');
 
 
 class ValidateService {
@@ -10,77 +12,73 @@ class ValidateService {
 
     private $rules = [];
 
-    private $errors;
+    private $errors = [];
 
-    public function __construct($dataForm){
+    private $rulesMap = [
+        'reqired' => ReqiredValidate::class,
+        'email' => EmailValidate::class,
+        'min' => MinValidate::class,
+        'between' => BetweenValidate::class,
+        'required_with' => RequiredWith::class
+    ];
+
+    public function __construct($dataForm)
+    {
         $this->dataForm = $dataForm;
     }
 
-    public function setRules($rules) {
+    public function setRules($rules) 
+    {
         $this->rules = $rules;
     }
 
 
-    public function validate() {
+    public function validate() 
+    {
         
-
-        foreach($this->rules as $field => $rule) {     
-            // get value field  
+        foreach($this->rules as $field => $rules) {
+            // get field value
             $fieldValue = $this->dataForm[$field];
 
-            if(strpos($rule, "|")) {
-                $ruleArray = explode("|", $rule);
-                foreach($ruleArray as $ruleItem) {
-                    if(strpos($rule, ":")) {
-                        $ruleOptional = explode(":", $ruleItem);
-                        $classNameValidate = ucfirst($ruleOptional[0]) . 'Validate';
-                        $instance = new $classNameValidate($fieldValue, $ruleOptional[1]);
+            // loop get item rule for item field
+            foreach($rules as $rule) {
 
-                        // check validate by class
-                        if(!$instance->passsedValidate()) {
-                            $message = $field . $instance->getMessage();
-                            // add to error
-                            $this->errors[$field][] = $message;
-                        }
+                $exploded = explode(":", $rule);
+                $nameRule = $exploded[0];
 
+                // pass paramater to contructor
+                $optionals = explode(",", end($exploded));
 
-                    } else {
-                        $this->addErrorByInstance($ruleItem, $fieldValue, $field);
-                    }
-                    
+                $className = $this->rulesMap[$nameRule];
+                $instanceClass = new $className(...$optionals);
+
+                // validate error -- this can use abstract class                
+                if(!$instanceClass->passsedValidate($field, $fieldValue, $this->dataForm)) {
+                    // push errors
+                    $this->errors[$field][] = $instanceClass->getMessage($field);
                 }
 
-            } else {
-                $this->addErrorByInstance($rule, $fieldValue, $field);
             }
-
+            
         }
 
+        return !$this->hasErrors();
+        
     }
 
-    private function addErrorByInstance($ruleItem, $fieldValue, $field){
-        $classNameValidate = ucfirst($ruleItem) . 'Validate';
-        $instance = new $classNameValidate($fieldValue);
-
-        // check validate by class
-        if(!$instance->passsedValidate()) {
-            $message = $field . $instance->getMessage();
-            // add to error
-            $this->errors[$field][] = $message;
-        }
-    }
-
-
-    public function getErrors() {
+    public function getErrors() 
+    {
         return $this->errors;
     }
 
-    public function counErrors() {
+    private function hasErrors() 
+    {
         if(is_array($this->errors) && count($this->errors) > 0) {
             return true;
         }
         return false;
     }
+
 
    
 }

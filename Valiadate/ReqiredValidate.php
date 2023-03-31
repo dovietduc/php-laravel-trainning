@@ -2,19 +2,17 @@
 
 class ReqiredValidate {
 
-    private $fieldValue;
-    public function __construct($fieldValue){
-        $this->fieldValue = $fieldValue;
-    }
-
-    public function passsedValidate() {
-        if($this->fieldValue) {
+    
+    public function passsedValidate($field, $value) 
+    {
+        if($value) {
             return true;
         }
-        return false;
+        return false;        
     }
 
-    public function getMessage(){
-        return ' not empty';
+    public function getMessage($field)
+    {
+        return $field . ' not empty';
     }
 }

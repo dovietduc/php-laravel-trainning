@@ -5,13 +5,25 @@
 $dataForm = [
     'name' => '',
     'email' => '',
-    'first_name' => ''
+    'first_name' => 'duc',
+    'email2' => ''
 ];
 
+
 $rules = [
-    'name' => 'reqired',
-    'email' => 'reqired|email',
-    'first_name' => 'reqired|min:3'
+    'name' => [
+        'reqired'
+    ],
+    'email' => [
+        'reqired',
+        'email',
+        'min:3',
+        'between:1,10',
+        'required_with:name,first_name'
+    ],
+    'email2' => [
+        'email:null'
+    ]
 ];
 
 require(__DIR__ . '/ValidateService.php');
@@ -19,36 +31,12 @@ require(__DIR__ . '/ValidateService.php');
 $validate = new ValidateService($dataForm);
 $validate->setRules($rules);
 
-
-// validate
+// validation
 $validate->validate();
-// get errors
 
 echo "<pre>";
 print_r($validate->getErrors());
 
-
-// $valueRule = $this->dataForm[$field];
-
-// // check rule have |
-// if(strpos($rule, "|")) {
-
-//     // apply validate for string have | example: reqired|email
-//     $ruleArray = explode("|", $rule);
-//     foreach($ruleArray as $ruleItem) {
-
-//         if(strpos($ruleItem, ":")) { 
-
-//             $ruleOptional = explode(":", $ruleItem);
-//             $functionValidate = $ruleOptional[0] . 'Validate';
-//             $this->$functionValidate($valueRule, $field, $ruleOptional[1]);
-//         } else {
-//             $functionValidate = $ruleItem . 'Validate';
-//             // function call validate dynamic
-//             $this->$functionValidate($valueRule, $field);
-//         }
-       
-//     }
 
 
 

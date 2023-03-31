@@ -2,22 +2,23 @@
 
 class MinValidate {
 
-    private $fieldValue;
     private $min;
 
-    public function __construct($fieldValue, $min){
-        $this->fieldValue = $fieldValue;
+    public function __construct($min)
+    {
         $this->min = $min;
     }
 
-    public function passsedValidate() {
-        if(strlen($this->fieldValue) >= $this->min) {
+    public function passsedValidate($field, $value) 
+    {
+        if(strlen($value) >= $this->min) {
             return true;
         }
         return false;
     }
 
-    public function getMessage(){
-        return ' must have ' . $this->min . ' character';
+    public function getMessage($field)
+    {
+        return $field . ' must have ' . $this->min . ' character';
     }
 }
